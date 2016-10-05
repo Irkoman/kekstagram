@@ -1,0 +1,51 @@
+h1 {
+  margin: 20px;
+  font-family: arial, sans-serif;
+  font-size: 32px;
+}
+
+.step {
+  width: 95%;
+  margin: 12px;
+  margin-bottom: 24px;
+
+  padding: 8px;
+
+  border: dotted 1px #ccc;
+  border-left: solid 8px #ccc;
+}
+
+.step_success {
+  border: dotted 1px #0F9439;
+  border-left: solid 8px #0F9439;
+}
+
+.step_failure {
+  border: dotted 1px #A82A13;
+  border-left: solid 8px #A82A13;
+}
+
+.step__title {
+  font-family: arial, sans-serif;
+  font-size: 24px;
+}
+
+.step__requirements, .step__result {
+  font-family: georgia, serif;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.step__result {
+  margin-top: 12px;
+}
+
+.step_success .step__result {
+  color: #0F9439;
+}
+
+.step__image {
+  width: 50%;
+  display: inline-block;
+  padding-top: 18px;
+}

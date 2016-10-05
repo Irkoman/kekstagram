@@ -1,0 +1,21 @@
+language: node_js
+
+node_js:
+  - "stable"
+
+env:
+  - TEST_CONFIG=eslint
+  - TEST_CONFIG=basic
+
+matrix:
+  allow_failures:
+    - env: TEST_CONFIG=basic
+
+script:
+  - export PR="https://api.github.com/repos/$TRAVIS_REPO_SLUG/pulls/$TRAVIS_PULL_REQUEST"
+  - export GITHUB_BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo `curl -s $PR | jq .head.ref`; fi)
+  - echo "GITHUB_BRANCH=$GITHUB_BRANCH, TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR"
+  - npm test
+
+notifications:
+  email: false

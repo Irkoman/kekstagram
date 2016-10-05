@@ -1,0 +1,6 @@
+bin/server.js
+bin/middleware.config.js
+bin/webpack.config.js
+bin/data/*
+src/js/check.js
+src/js/*.min.js

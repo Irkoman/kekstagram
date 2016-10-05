@@ -1,0 +1,39 @@
+{
+  "name": "38472-kekstagram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Личный проект «Кекстаграм» от HTML Academy",
+  "author": "Ирина Смирнова",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:htmlacademy-javascript/38472-kekstagram.git"
+  },
+  "bugs": {
+    "url": "https://github.com/htmlacademy-javascript/38472-kekstagram/issues"
+  },
+  "homepage": "https://github.com/htmlacademy-javascript/38472-kekstagram",
+  "devDependencies": {
+    "copy-webpack-plugin": "^3.0.1",
+    "eslint": "3.2.0",
+    "eslint-plugin-requirejs": "2.0.1",
+    "express": "4.14.0",
+    "finalhandler": "0.5.0",
+    "http-server": "0.9.0",
+    "imagemagick": "0.1.3",
+    "log4js": "0.6.37",
+    "opener": "1.4.1",
+    "phantomjs-prebuilt": "2.1.7",
+    "webpack": "1.13.2",
+    "webpack-dev-middleware": "1.6.1"
+  },
+  "dependencies": {},
+  "scripts": {
+    "build": "webpack --config ./bin/webpack.config.js",
+    "start": "node ./bin/server.js kekstagram",
+    "test": "node tests/lib/index.js"
+  },
+  "engines": {
+    "node": "^5.11.0"
+  },
+  "openBrowser": false
+}
