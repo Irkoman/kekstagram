@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url] [![Dependency status][dependency-image]][dependency-url]
 
 * Студент: [Ирина Смирнова](https://up.htmlacademy.ru/javascript/7/user/38472).
-* Наставник: `Неизвестно`.
+* Наставник: `Кекс`.
 
 ---
 
