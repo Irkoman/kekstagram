@@ -27,7 +27,9 @@
     "webpack": "1.13.2",
     "webpack-dev-middleware": "1.6.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "glob": "^7.1.1"
+  },
   "scripts": {
     "build": "webpack --config ./bin/webpack.config.js",
     "start": "node ./bin/server.js kekstagram",
