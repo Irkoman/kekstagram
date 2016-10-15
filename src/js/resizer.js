@@ -111,6 +111,17 @@
       // Координаты задаются от центра холста.
       this._ctx.drawImage(this._image, displX, displY);
 
+      // Оверлей вокруг жёлтой ограничивающей рамки
+      this._ctx.beginPath();
+      this._ctx.rect(displX, displY, this._container.width, this._container.height);
+      this._ctx.rect(-(this._resizeConstraint.side / 2) - this._ctx.lineWidth,
+          (-this._resizeConstraint.side / 2) - this._ctx.lineWidth,
+          this._resizeConstraint.side + this._ctx.lineWidth / 2,
+          this._resizeConstraint.side + this._ctx.lineWidth / 2);
+      this._ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      this._ctx.fill('evenodd');
+      this._ctx.closePath();
+
       // Отрисовка прямоугольника, обозначающего область изображения после
       // кадрирования. Координаты задаются от центра.
       this._ctx.strokeRect(
@@ -118,6 +129,13 @@
           (-this._resizeConstraint.side / 2) - this._ctx.lineWidth / 2,
           this._resizeConstraint.side - this._ctx.lineWidth / 2,
           this._resizeConstraint.side - this._ctx.lineWidth / 2);
+
+      // Выводим размеры кадрируемого изображения
+      var imageSize = this._image.naturalWidth + ' x ' + this._image.naturalHeight;
+      this._ctx.font = '13px Open Sans';
+      this._ctx.fillStyle = '#ffffff';
+      this._ctx.textAlign = 'center';
+      this._ctx.fillText(imageSize, 0, -this._resizeConstraint.side / 2 - 15);
 
       // Восстановление состояния канваса, которое было до вызова ctx.save
       // и последующего изменения системы координат. Нужно для того, чтобы
