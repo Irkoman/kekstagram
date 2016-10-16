@@ -83,21 +83,6 @@
       // Очистка изображения.
       this._ctx.clearRect(0, 0, this._container.width, this._container.height);
 
-      // Параметры линии.
-      // NB! Такие параметры сохраняются на время всего процесса отрисовки
-      // canvas'a поэтому важно вовремя поменять их, если нужно начать отрисовку
-      // чего-либо с другой обводкой.
-
-      // Толщина линии.
-      this._ctx.lineWidth = 6;
-      // Цвет обводки.
-      this._ctx.strokeStyle = '#ffe753';
-      // Размер штрихов. Первый элемент массива задает длину штриха, второй
-      // расстояние между соседними штрихами.
-      this._ctx.setLineDash([15, 10]);
-      // Смещение первого штриха от начала линии.
-      this._ctx.lineDashOffset = 7;
-
       // Сохранение состояния канваса.
       this._ctx.save();
 
@@ -106,6 +91,8 @@
 
       var displX = -(this._resizeConstraint.x + this._resizeConstraint.side / 2);
       var displY = -(this._resizeConstraint.y + this._resizeConstraint.side / 2);
+      var lineWidth = this._ctx.lineWidth = 2;
+
       // Отрисовка изображения на холсте. Параметры задают изображение, которое
       // нужно отрисовать и координаты его верхнего левого угла.
       // Координаты задаются от центра холста.
@@ -114,21 +101,36 @@
       // Оверлей вокруг жёлтой ограничивающей рамки
       this._ctx.beginPath();
       this._ctx.rect(displX, displY, this._container.width, this._container.height);
-      this._ctx.rect(-(this._resizeConstraint.side / 2) - this._ctx.lineWidth,
-          (-this._resizeConstraint.side / 2) - this._ctx.lineWidth,
-          this._resizeConstraint.side + this._ctx.lineWidth / 2,
-          this._resizeConstraint.side + this._ctx.lineWidth / 2);
+      this._ctx.rect(-(this._resizeConstraint.side / 2) - lineWidth,
+          (-this._resizeConstraint.side / 2) - lineWidth,
+          this._resizeConstraint.side + lineWidth / 2,
+          this._resizeConstraint.side + lineWidth / 2);
       this._ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
       this._ctx.fill('evenodd');
       this._ctx.closePath();
 
       // Отрисовка прямоугольника, обозначающего область изображения после
       // кадрирования. Координаты задаются от центра.
-      this._ctx.strokeRect(
-          (-this._resizeConstraint.side / 2) - this._ctx.lineWidth / 2,
-          (-this._resizeConstraint.side / 2) - this._ctx.lineWidth / 2,
-          this._resizeConstraint.side - this._ctx.lineWidth / 2,
-          this._resizeConstraint.side - this._ctx.lineWidth / 2);
+      var startPoint = -this._resizeConstraint.side / 2;
+      var endPoint = this._resizeConstraint.side / 2 - lineWidth * 2;
+      this._ctx.fillStyle = '#ffe753';
+
+      var drawDottedLine = function(x, y) {
+        this._ctx.beginPath();
+        this._ctx.arc(x, y, 2, 0, Math.PI * 2);
+        this._ctx.fill();
+        this._ctx.closePath();
+      }.bind(this);
+
+      for (var i = startPoint; i <= endPoint; i += 8) {
+        drawDottedLine(i, startPoint);
+        drawDottedLine(startPoint, i);
+      }
+
+      for (i = endPoint; i >= startPoint; i -= 8) {
+        drawDottedLine(i, endPoint);
+        drawDottedLine(endPoint, i);
+      }
 
       // Выводим размеры кадрируемого изображения
       var imageSize = this._image.naturalWidth + ' x ' + this._image.naturalHeight;
