@@ -89,55 +89,65 @@
       // Установка начальной точки системы координат в центр холста.
       this._ctx.translate(this._container.width / 2, this._container.height / 2);
 
-      var displX = -(this._resizeConstraint.x + this._resizeConstraint.side / 2);
-      var displY = -(this._resizeConstraint.y + this._resizeConstraint.side / 2);
       var lineWidth = this._ctx.lineWidth = 2;
+      var side = this._resizeConstraint.side;
+      var displX = -(this._resizeConstraint.x + side / 2);
+      var displY = -(this._resizeConstraint.y + side / 2);
 
       // Отрисовка изображения на холсте. Параметры задают изображение, которое
       // нужно отрисовать и координаты его верхнего левого угла.
       // Координаты задаются от центра холста.
       this._ctx.drawImage(this._image, displX, displY);
 
-      // Оверлей вокруг жёлтой ограничивающей рамки
+      // Оверлей вокруг ограничивающей рамки
       this._ctx.beginPath();
       this._ctx.rect(displX, displY, this._container.width, this._container.height);
-      this._ctx.rect(-(this._resizeConstraint.side / 2) - lineWidth,
-          (-this._resizeConstraint.side / 2) - lineWidth,
-          this._resizeConstraint.side + lineWidth / 2,
-          this._resizeConstraint.side + lineWidth / 2);
+      this._ctx.rect(-side / 2 - lineWidth,
+          -side / 2 - lineWidth,
+          side + lineWidth * 2,
+          side + lineWidth * 2);
       this._ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
       this._ctx.fill('evenodd');
       this._ctx.closePath();
 
-      // Отрисовка прямоугольника, обозначающего область изображения после
-      // кадрирования. Координаты задаются от центра.
-      var startPoint = -this._resizeConstraint.side / 2;
-      var endPoint = this._resizeConstraint.side / 2 - lineWidth * 2;
-      this._ctx.fillStyle = '#ffe753';
-
-      var drawDottedLine = function(x, y) {
-        this._ctx.beginPath();
-        this._ctx.arc(x, y, 2, 0, Math.PI * 2);
-        this._ctx.fill();
-        this._ctx.closePath();
-      }.bind(this);
-
-      for (var i = startPoint; i <= endPoint; i += 8) {
-        drawDottedLine(i, startPoint);
-        drawDottedLine(startPoint, i);
-      }
-
-      for (i = endPoint; i >= startPoint; i -= 8) {
-        drawDottedLine(i, endPoint);
-        drawDottedLine(endPoint, i);
-      }
-
-      // Выводим размеры кадрируемого изображения
+      // Вывод размеров кадрируемого изображения
       var imageSize = this._image.naturalWidth + ' x ' + this._image.naturalHeight;
       this._ctx.font = '13px Open Sans';
       this._ctx.fillStyle = '#ffffff';
       this._ctx.textAlign = 'center';
-      this._ctx.fillText(imageSize, 0, -this._resizeConstraint.side / 2 - 15);
+      this._ctx.fillText(imageSize, 0, -side / 2 - 10);
+
+      // Отрисовка зигзагообразной рамки, обозначающей область изображения
+      // после кадрирования. Обозначим период и колебание
+      var period = side / 20;
+      var oscillation = side / 40;
+
+      // Вычисление Y-координат в треугольной волне
+      function findY(x) {
+        return Math.abs((x % period) - oscillation);
+      }
+
+      this._ctx.beginPath();
+      this._ctx.strokeStyle = '#ffe753';
+      // Смена начальной точки системы координат:
+      // теперь она в левом верхнем углу области.
+      this._ctx.translate(-side / 2, -side / 2);
+
+      for (var x = 0, i = 1; x < 4 * side; x++) {
+        var y = findY(x);
+        this._ctx.lineTo(x, y);
+
+        // По мере отрисовки каждой из сторон, делаем поворот
+        // и меняем точку отсчёта.
+        if (x === Math.floor(i * side)) {
+          this._ctx.rotate(90 * Math.PI / 180);
+          this._ctx.translate(-side * i, -side * i);
+          i++;
+        }
+      }
+
+      this._ctx.stroke();
+      this._ctx.closePath();
 
       // Восстановление состояния канваса, которое было до вызова ctx.save
       // и последующего изменения системы координат. Нужно для того, чтобы
