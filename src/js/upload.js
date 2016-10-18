@@ -68,14 +68,6 @@
   };
 
   /**
-   * Проверяет, валидны ли данные, в форме кадрирования.
-   * @return {boolean}
-   */
-  var resizeFormIsValid = function() {
-    return true;
-  };
-
-  /**
    * Форма загрузки изображения.
    * @type {HTMLFormElement}
    */
@@ -102,6 +94,52 @@
    * @type {HTMLElement}
    */
   var uploadMessage = document.querySelector('.upload-message');
+
+  /**
+   * Переменные для валидации формы кадрирования
+   */
+  var xField = resizeForm.elements.x;
+  var yField = resizeForm.elements.y;
+  var sideField = resizeForm.elements.size;
+  var submitButton = resizeForm.elements.fwd;
+
+  /**
+   * Установка минимальных значений для полей
+   */
+  xField.min = yField.min = sideField.min = 0;
+
+  /**
+   * Функция, проверяющая данные на валидность
+   * @return {boolean}
+   */
+  var resizeFormIsValid = function() {
+    var imageWidth = currentResizer._image.naturalWidth;
+    var imageHeight = currentResizer._image.naturalHeight;
+
+    var isValid = (+xField.value + +sideField.value <= +imageWidth) &&
+              (+yField.value + +sideField.value <= +imageHeight) &&
+              (+xField.value >= 0) && (+yField.value >= 0);
+
+    submitButton.disabled = !isValid;
+    return isValid;
+  };
+
+  /**
+   * Переключатель для атрибута disabled кнопки отправки формы
+   */
+  function toggleSubmitButton() {
+    submitButton.disabled = !resizeFormIsValid();
+  }
+
+  /**
+   * Для каждого поля с типом number устанавливаем обработчик события input
+   * (вызов функции toggleSubmitButton)
+   */
+  var allNumberFields = resizeForm.querySelectorAll('input[type="number"]');
+
+  for (var i = 0; i < allNumberFields.length; i++) {
+    allNumberFields[i].oninput = toggleSubmitButton;
+  }
 
   /**
    * @param {Action} action
@@ -197,7 +235,7 @@
       var image = currentResizer.exportImage().src;
 
       var thumbnails = filterForm.querySelectorAll('.upload-filter-preview');
-      for (var i = 0; i < thumbnails.length; i++) {
+      for (i = 0; i < thumbnails.length; i++) {
         thumbnails[i].style.backgroundImage = 'url(' + image + ')';
       }
 
