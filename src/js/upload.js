@@ -1,4 +1,5 @@
 /* global Resizer: true */
+/* global Cookies: true */
 
 /**
  * @fileoverview
@@ -253,6 +254,14 @@
   filterForm.onreset = function(evt) {
     evt.preventDefault();
 
+    /**
+     * Если в куках есть фильтр, он устанавливается по дефолту
+     */
+    var selectedFilter = Cookies.get('upload-filter');
+    if (selectedFilter) {
+      filterImage.className = 'filter-image-preview ' + filterMap[selectedFilter];
+    }
+
     filterForm.classList.add('invisible');
     resizeForm.classList.remove('invisible');
   };
@@ -265,6 +274,9 @@
   filterForm.onsubmit = function(evt) {
     evt.preventDefault();
 
+    var filterChecked = document.querySelector('input[name="upload-filter"]:checked');
+    Cookies.set('upload-filter', filterChecked.value, { expires: computeDateToExpire() });
+
     cleanupResizer();
     updateBackground();
 
@@ -273,7 +285,23 @@
   };
 
   /**
-   * Обработчик изменения фильтра. Добавляет класс из filterMap соответствующий
+   * Функция высчитывает количество дней с последнего прошедшего дня рождения Грейс Хоппер
+   * и в соответствии с ней назначает dateToExpire для куки
+   */
+  function computeDateToExpire() {
+    var today = new Date();
+    var birthdayOfGraceHopper = new Date(today.getFullYear(), 11, 9);
+
+    if (today < birthdayOfGraceHopper) {
+      birthdayOfGraceHopper = new Date(today.getFullYear() - 1, 11, 9);
+    }
+
+    var dateToExpire = +today + (today - birthdayOfGraceHopper);
+    return new Date(dateToExpire);
+  }
+
+  /**
+   * Обработчик изменения фильтра. Добавляет класс из filterMap, соответствующий
    * выбранному значению в форме.
    */
   filterForm.onchange = function() {
