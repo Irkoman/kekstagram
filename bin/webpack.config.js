@@ -10,23 +10,6 @@ const OUTPUT_DIRNAME = path.resolve(projectRoot, 'build');
 const SRC_DIRNAME = path.resolve(projectRoot, 'src');
 
 
-const getJSFiles = (dir) => {
-  try {
-    let files = fs.readdirSync(dir, 'utf-8');
-    let output = {};
-
-    files.forEach((filename) => {
-      output[filename.replace(/\.js$/, '')] = path.resolve(dir, filename);
-    });
-
-    return output;
-  } catch(err) {
-    console.error(err);
-    process.exit(1);
-  }
-};
-
-
 module.exports = {
   devServer: {
     contentBase: OUTPUT_DIRNAME,
@@ -35,7 +18,7 @@ module.exports = {
 
   devtool: 'sourcemap',
 
-  entry: getJSFiles(path.resolve(SRC_DIRNAME, 'js')),
+  entry: path.resolve(SRC_DIRNAME, 'js/main.js'),
 
   output: {
     filename: 'js/[name].js',

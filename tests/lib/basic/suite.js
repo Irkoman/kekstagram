@@ -213,9 +213,15 @@ sp._getNodeTestIn = function(folder) {
   var testPath = glob.sync(path.join(folder, 'node-*.js'))[0];
   var test = require(testPath);
 
-  return new Promise(function(resolve) {
-    resolve(test());
-  });
+  var testResult = test();
+
+  if(testResult instanceof Promise) {
+    return testResult;
+  } else {
+    return new Promise(function(resolve) {
+      resolve(testResult);
+    });
+  }
 };
 
 sp._getPhantomTestIn = function(folder) {

@@ -13,18 +13,21 @@ var NodeTestCase = module.exports = function(name, hash) {
 
 Object.assign(NodeTestCase.prototype, {
   run: function() {
+    var testCase = this;
+    
     try {
       this.runAsserts(); // should be implemented in super-class
     } catch(err) {
+      // console.log(err);
     }
 
-    return {
-      result: this.result ? 'SUCCESS' : 'FAILURE',
-      title: this.title,
-      type: 'node',
-      task: this.name,
-      asserts: this.asserts
-    };
+    if(this.promises && this.promises.length > 0) {
+      return Promise.all(this.promises).then(function() {
+        return testCase._getResult();
+      });
+    } else {
+      return this._getResult();
+    }
   },
 
   assertEqual: function(expected, actual, message) {
@@ -58,6 +61,15 @@ Object.assign(NodeTestCase.prototype, {
     }
   },
 
+  addPromise: function(callback) {
+    var promise = new Promise(callback);
+
+    this.promises || (this.promises = []);
+    this.promises.push(promise);
+
+    return promise;
+  },
+
   _addSuccess: function(message) {
     this.asserts.push({ title: message, result: ASSERT_SUCCESS });
   },
@@ -70,5 +82,15 @@ Object.assign(NodeTestCase.prototype, {
     });
 
     this.result = false;
+  },
+
+  _getResult: function() {
+    return {
+      result: this.result ? 'SUCCESS' : 'FAILURE',
+      title: this.title,
+      type: 'node',
+      task: this.name,
+      asserts: this.asserts
+    };
   }
 });
