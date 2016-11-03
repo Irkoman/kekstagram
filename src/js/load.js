@@ -12,7 +12,7 @@
  * @param {function} callback
  * @param {string} callbackName
  */
-module.exports = function(url, callback, callbackName) {
+var load = function(url, callback, callbackName) {
   if (!callbackName) {
     callbackName = 'callback' + Date.now();
   }
@@ -29,3 +29,5 @@ module.exports = function(url, callback, callbackName) {
   script.src = url + '?callback=' + callbackName;
   document.body.appendChild(script);
 };
+
+module.exports = load;

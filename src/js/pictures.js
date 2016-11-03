@@ -7,6 +7,7 @@
 
 var load = require('./load');
 var getPictureElement = require('./picture');
+var gallery = require('./gallery');
 
 module.exports = function() {
   /**
@@ -34,10 +35,12 @@ module.exports = function() {
     var templateContainer = 'content' in template ? template.content : template;
     var templateElement = templateContainer.querySelector('.picture');
 
-    pictures.forEach(function(picture) {
-      var newPictureElement = getPictureElement(picture, templateElement, PHOTO_LOAD_TIMEOUT);
+    pictures.forEach(function(picture, index) {
+      var newPictureElement = getPictureElement(picture, index, templateElement, PHOTO_LOAD_TIMEOUT);
       container.appendChild(newPictureElement);
     });
+
+    gallery.setPictures(pictures);
   };
 
   /**
