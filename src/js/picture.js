@@ -5,7 +5,9 @@
 
 'use strict';
 
-module.exports = function(picture, templateElement, PHOTO_LOAD_TIMEOUT) {
+var gallery = require('./gallery');
+
+var getPictureElement = function(picture, index, templateElement, PHOTO_LOAD_TIMEOUT) {
   var pictureElement = templateElement.cloneNode(true);
 
   pictureElement.querySelector('.picture-likes').textContent = picture.likes;
@@ -27,6 +29,14 @@ module.exports = function(picture, templateElement, PHOTO_LOAD_TIMEOUT) {
     pictureElement.classList.add('picture-load-failure');
   };
 
+  pictureElement.onclick = function(event) {
+    event.preventDefault();
+
+    if(!pictureElement.classList.contains('picture-load-failure')) {
+      gallery.show(index);
+    }
+  };
+
   photo.src = picture.url;
 
   photoTimeout = setTimeout(function() {
@@ -35,3 +45,5 @@ module.exports = function(picture, templateElement, PHOTO_LOAD_TIMEOUT) {
 
   return pictureElement;
 };
+
+module.exports = getPictureElement;
