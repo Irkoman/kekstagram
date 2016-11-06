@@ -6,16 +6,10 @@
 'use strict';
 
 var load = require('./load');
-var getPictureElement = require('./picture');
 var gallery = require('./gallery');
+var Picture = require('./picture');
 
 module.exports = function() {
-  /**
-   * Время, отведённое на ожидание загрузки фотографии
-   * @const
-   * @type {number}
-   */
-  var PHOTO_LOAD_TIMEOUT = 10000;
   var DATA_LOAD_URL = 'http://localhost:1507/api/pictures';
   var container = document.querySelector('.pictures');
 
@@ -31,13 +25,9 @@ module.exports = function() {
    * @param {Object[]} pictures
    */
   var renderPictures = function(pictures) {
-    var template = document.getElementById('picture-template');
-    var templateContainer = 'content' in template ? template.content : template;
-    var templateElement = templateContainer.querySelector('.picture');
-
     pictures.forEach(function(picture, index) {
-      var newPictureElement = getPictureElement(picture, index, templateElement, PHOTO_LOAD_TIMEOUT);
-      container.appendChild(newPictureElement);
+      var newPicture = new Picture(picture, index);
+      container.appendChild(newPicture.element);
     });
 
     gallery.setPictures(pictures);
