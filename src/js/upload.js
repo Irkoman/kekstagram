@@ -31,9 +31,7 @@ module.exports = function() {
    */
   var fileRegExp = new RegExp('^image/(' + Object.keys(FileType).join('|').replace('\+', '\\+') + ')$', 'i');
 
-  /**
-   * @type {Object.<string, string>}
-   */
+  /** @type {Object.<string, string>} */
   var filterMap;
 
   /**
@@ -86,28 +84,41 @@ module.exports = function() {
    */
   var filterForm = document.forms['upload-filter'];
 
-  /**
-   * @type {HTMLImageElement}
-   */
+  /** @type {HTMLImageElement} */
   var filterImage = filterForm.querySelector('.filter-image-preview');
 
-  /**
-   * @type {HTMLElement}
-   */
+  /** @type {HTMLElement} */
   var uploadMessage = document.querySelector('.upload-message');
 
-  /**
-   * Переменные для валидации формы кадрирования
-   */
+  /**  Переменные для валидации формы кадрирования */
   var xField = resizeForm.elements.x;
   var yField = resizeForm.elements.y;
   var sideField = resizeForm.elements.size;
+  var resizeControls = document.querySelector('.upload-resize-controls');
   var submitButton = resizeForm.elements.fwd;
 
   /**
    * Установка минимальных значений для полей
    */
-  xField.min = yField.min = sideField.min = 0;
+  xField.min = 0;
+  yField.min = 0;
+  sideField.min = 30;
+
+  window.addEventListener('resizerchange', function() {
+    var constraint = currentResizer.getConstraint();
+
+    xField.value = constraint.x;
+    yField.value = constraint.y;
+    sideField.value = constraint.side;
+  });
+
+  resizeControls.addEventListener('input', function() {
+    var xValue = parseInt(xField.value, 10);
+    var yValue = parseInt(yField.value, 10);
+    var sizeValue = parseInt(sideField.value, 10);
+
+    currentResizer.setConstraint(xValue, yValue, sizeValue);
+  }, true);
 
   /**
    * Функция, проверяющая данные на валидность
@@ -118,8 +129,8 @@ module.exports = function() {
     var imageHeight = currentResizer._image.naturalHeight;
 
     var isValid = (+xField.value + +sideField.value <= +imageWidth) &&
-              (+yField.value + +sideField.value <= +imageHeight) &&
-              (+xField.value >= 0) && (+yField.value >= 0);
+                  (+yField.value + +sideField.value <= +imageHeight) &&
+                  (+xField.value >= 0) && (+yField.value >= 0);
 
     submitButton.disabled = !isValid;
     return isValid;
@@ -133,14 +144,14 @@ module.exports = function() {
   }
 
   /**
-   * Для каждого поля с типом number устанавливаем обработчик события input
-   * (вызов функции toggleSubmitButton)
+   * Делегирование вместо установки обработчика на каждый input
    */
-  var allNumberFields = resizeForm.querySelectorAll('input[type="number"]');
-
-  for (var i = 0; i < allNumberFields.length; i++) {
-    allNumberFields[i].oninput = toggleSubmitButton;
-  }
+  resizeControls.addEventListener('input', function(event) {
+    event.preventDefault();
+    if (event.target.type === 'number') {
+      toggleSubmitButton();
+    }
+  }, true);
 
   /**
    * @param {Action} action
@@ -176,10 +187,10 @@ module.exports = function() {
    * файл является изображением, считывается исходник картинки, создается
    * Resizer с загруженной картинкой, добавляется в форму кадрирования
    * и показывается форма кадрирования.
-   * @param {Event} evt
+   * @param {Event} event
    */
-  uploadForm.onchange = function(evt) {
-    var element = evt.target;
+  uploadForm.addEventListener('change', function(event) {
+    var element = event.target;
     if (element.id === 'upload-file') {
       // Проверка типа загружаемого файла, тип должен быть изображением
       // одного из форматов: JPEG, PNG, GIF или SVG.
@@ -188,7 +199,7 @@ module.exports = function() {
 
         showMessage(Action.UPLOADING);
 
-        fileReader.onload = function() {
+        fileReader.addEventListener('load', function() {
           cleanupResizer();
 
           currentResizer = new Resizer(fileReader.result);
@@ -199,7 +210,7 @@ module.exports = function() {
           resizeForm.classList.remove('invisible');
 
           hideMessage();
-        };
+        });
 
         fileReader.readAsDataURL(element.files[0]);
       } else {
@@ -207,36 +218,36 @@ module.exports = function() {
         showMessage(Action.ERROR);
       }
     }
-  };
+  });
 
   /**
    * Обработка сброса формы кадрирования. Возвращает в начальное состояние
    * и обновляет фон.
-   * @param {Event} evt
+   * @param {Event} event
    */
-  resizeForm.onreset = function(evt) {
-    evt.preventDefault();
+  resizeForm.addEventListener('reset', function(event) {
+    event.preventDefault();
 
     cleanupResizer();
     updateBackground();
 
     resizeForm.classList.add('invisible');
     uploadForm.classList.remove('invisible');
-  };
+  });
 
   /**
    * Обработка отправки формы кадрирования. Если форма валидна, экспортирует
    * кропнутое изображение в форму добавления фильтра и показывает ее.
-   * @param {Event} evt
+   * @param {Event} event
    */
-  resizeForm.onsubmit = function(evt) {
-    evt.preventDefault();
+  resizeForm.addEventListener('submit', function(event) {
+    event.preventDefault();
 
     if (resizeFormIsValid()) {
       var image = currentResizer.exportImage().src;
 
       var thumbnails = filterForm.querySelectorAll('.upload-filter-preview');
-      for (i = 0; i < thumbnails.length; i++) {
+      for (var i = 0; i < thumbnails.length; i++) {
         thumbnails[i].style.backgroundImage = 'url(' + image + ')';
       }
 
@@ -245,14 +256,15 @@ module.exports = function() {
       resizeForm.classList.add('invisible');
       filterForm.classList.remove('invisible');
     }
-  };
+  });
+
 
   /**
    * Сброс формы фильтра. Показывает форму кадрирования.
-   * @param {Event} evt
+   * @param {Event} event
    */
-  filterForm.onreset = function(evt) {
-    evt.preventDefault();
+  filterForm.addEventListener('reset', function(event) {
+    event.preventDefault();
 
     /**
      * Если в куках есть фильтр, он устанавливается по дефолту
@@ -264,15 +276,15 @@ module.exports = function() {
 
     filterForm.classList.add('invisible');
     resizeForm.classList.remove('invisible');
-  };
+  });
 
   /**
    * Отправка формы фильтра. Возвращает в начальное состояние, предварительно
    * записав сохраненный фильтр в cookie.
-   * @param {Event} evt
+   * @param {Event} event
    */
-  filterForm.onsubmit = function(evt) {
-    evt.preventDefault();
+  filterForm.addEventListener('submit', function(event) {
+    event.preventDefault();
 
     var filterChecked = document.querySelector('input[name="upload-filter"]:checked');
     Cookies.set('upload-filter', filterChecked.value, { expires: computeDateToExpire() });
@@ -282,7 +294,7 @@ module.exports = function() {
 
     filterForm.classList.add('invisible');
     uploadForm.classList.remove('invisible');
-  };
+  });
 
   /**
    * Функция высчитывает количество дней с последнего прошедшего дня рождения
@@ -304,7 +316,7 @@ module.exports = function() {
    * Обработчик изменения фильтра. Добавляет класс из filterMap, соответствующий
    * выбранному значению в форме.
    */
-  filterForm.onchange = function() {
+  filterForm.addEventListener('change', function() {
     if (!filterMap) {
       // Ленивая инициализация. Объект не создается до тех пор, пока
       // не понадобится прочитать его в первый раз, а после этого запоминается
@@ -325,7 +337,7 @@ module.exports = function() {
     // убрать предыдущий примененный класс. Для этого нужно или запоминать его
     // состояние или просто перезаписывать.
     filterImage.className = 'filter-image-preview ' + filterMap[selectedFilter];
-  };
+  });
 
   cleanupResizer();
   updateBackground();
