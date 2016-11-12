@@ -15,33 +15,33 @@ var Gallery = function() {
 };
 
 Gallery.prototype.setPictures = function(pictures) {
-  this.pictures = pictures;
+  this.pictures = this.pictures.concat(pictures);
+};
+
+Gallery.prototype.clearPictures = function() {
+  this.pictures = [];
 };
 
 Gallery.prototype.show = function(index) {
   var self = this;
 
-  galleryClose.onclick = function() {
-    self.hide();
-  };
-
   galleryImage.onclick = function() {
-    if(self.activePicture < self.pictures.length - 1) {
-      self.setActivePicture(++self.activePicture);
-    } else {
+    if (self.activePicture === self.pictures.length - 1) {
       self.setActivePicture(0);
+    } else {
+      self.setActivePicture(self.activePicture + 1);
     }
   };
 
   gallery.classList.remove('invisible');
-
+  galleryClose.onclick = self.hide;
   self.setActivePicture(index);
 };
 
 Gallery.prototype.hide = function() {
+  gallery.classList.add('invisible');
   galleryClose.onclick = null;
   galleryImage.onclick = null;
-  gallery.classList.add('invisible');
 };
 
 Gallery.prototype.setActivePicture = function(index) {

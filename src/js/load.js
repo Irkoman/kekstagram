@@ -1,33 +1,36 @@
 /**
- * @fileoverview
+ * @fileoverview Универсальный метод для загрузки данных
  * @author Irina Smirnova (Irkoman)
  */
 
 'use strict';
 
 /**
- * Функция для выполнения JSONP-запросов. Название коллбэка
- * опционально (если не передано, генерируется случайное).
  * @param {string} url
+ * @param {object} params
  * @param {function} callback
- * @param {string} callbackName
  */
-var load = function(url, callback, callbackName) {
-  if (!callbackName) {
-    callbackName = 'callback' + Date.now();
+var getSearchString = function(params) {
+  return Object.keys(params).map(function(param) {
+    return [param, params[param]].join('=');
+  }).join('&');
+};
+
+var load = function(url, params, callback) {
+  var xhr = new XMLHttpRequest();
+
+  if (params) {
+    url += '?' + getSearchString(params);
   }
 
-  window[callbackName] = function(data) {
-    callback(data);
+  /** @param {ProgressEvent} */
+  xhr.onload = function(event) {
+    var loadedData = JSON.parse(event.target.response);
+    callback(loadedData);
   };
 
-  /**
-   * С помощью тега <script> делаем запрос
-   * к скрипту с данными на сервере
-   */
-  var script = document.createElement('script');
-  script.src = url + '?callback=' + callbackName;
-  document.body.appendChild(script);
+  xhr.open('GET', url);
+  xhr.send();
 };
 
 module.exports = load;

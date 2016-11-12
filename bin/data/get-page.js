@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = function(list, from, to) {
-  return list;
+  return list.slice(from, to);
 };
