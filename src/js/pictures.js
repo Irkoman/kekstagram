@@ -14,6 +14,7 @@ module.exports = function() {
   var picturesContainer = document.querySelector('.pictures');
   var filters = document.querySelector('.filters');
   var footer = document.querySelector('.footer');
+  var loadedPictures = [];
 
   /** @constant {number} */
   var PAGE_SIZE = 12;
@@ -47,34 +48,33 @@ module.exports = function() {
 
     pictures.forEach(function(picture, index) {
       var newPicture = new Picture(picture, pageNumber * PAGE_SIZE + index);
-      container.appendChild(newPicture.element);
+      container.appendChild(newPicture.renderPicture());
     });
 
     picturesContainer.appendChild(container);
     gallery.setPictures(pictures);
     document.getElementById(activeFilter).checked = true;
     filters.classList.remove('hidden');
-
-    /**
-     * После того, как часть фотографий отрендерилась, можем узнать
-     * высоту контейнера и вызвать загрузку следующей страницы,
-     * если экран ещё не заполнен
-     */
-    if (picturesContainer.getBoundingClientRect().height < window.innerHeight + GAP) {
-      loadPictures(activeFilter, ++pageNumber);
-    }
   };
 
   /**
    * @param {string} filter
-   * @param {number} currentPage
    */
-  var loadPictures = function(filter, currentPage) {
+  var loadPictures = function(filter) {
     load(DATA_LOAD_URL, {
-      from: currentPage * PAGE_SIZE,
-      to: currentPage * PAGE_SIZE + PAGE_SIZE,
+      from: pageNumber * PAGE_SIZE,
+      to: pageNumber * PAGE_SIZE + PAGE_SIZE,
       filter: filter
-    }, renderPictures);
+    }, function(data) {
+      if (data.length > 0) {
+        renderPictures(data);
+        loadedPictures = data;
+      }
+      if (isNextPageNeeded() && isNextPageAvailable(loadedPictures)) {
+        pageNumber++;
+        loadPictures(filter);
+      }
+    });
   };
 
   /**  Обработчик кликов по фильтрам */
@@ -91,14 +91,19 @@ module.exports = function() {
     }, true);
   };
 
-  var isFooterVisible = function() {
-    return (footer.getBoundingClientRect().top - window.innerHeight) <= GAP;
+  var isNextPageNeeded = function() {
+    return (footer.getBoundingClientRect().top - window.innerHeight) <= GAP ||
+      (picturesContainer.getBoundingClientRect().height - window.innerHeight <= GAP);
+  };
+
+  var isNextPageAvailable = function(data) {
+    return pageNumber < Math.floor(data.length / PAGE_SIZE);
   };
 
   /** Обработчик прокрутки */
   var setScrollEnabled = function() {
     var optimizedScroll = throttle(function() {
-      if (isFooterVisible()) {
+      if (isNextPageNeeded()) {
         loadPictures(activeFilter, ++pageNumber);
       }
     }, THROTTLE_DELAY);
@@ -106,7 +111,7 @@ module.exports = function() {
     window.addEventListener('scroll', optimizedScroll);
   };
 
-  loadPictures(DEFAULT_FILTER, pageNumber);
+  loadPictures(activeFilter, pageNumber);
   setFiltersEnabled();
   setScrollEnabled();
 };
