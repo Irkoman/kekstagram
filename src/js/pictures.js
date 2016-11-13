@@ -6,8 +6,9 @@
 'use strict';
 
 var load = require('./load');
-var gallery = require('./gallery');
 var Picture = require('./picture');
+var gallery = require('./gallery');
+var throttle = require('./throttle');
 
 module.exports = function() {
   var picturesContainer = document.querySelector('.pictures');
@@ -45,13 +46,22 @@ module.exports = function() {
     var container = document.createDocumentFragment();
 
     pictures.forEach(function(picture, index) {
-      var newPicture = new Picture(picture, index);
+      var newPicture = new Picture(picture, pageNumber * PAGE_SIZE + index);
       container.appendChild(newPicture.element);
     });
 
     picturesContainer.appendChild(container);
     gallery.setPictures(pictures);
     filters.classList.remove('hidden');
+
+    /**
+     * После того, как часть фотографий отрендерилась, можем узнать
+     * высоту контейнера и вызвать загрузку следующей страницы,
+     * если экран ещё не заполнен
+     */
+    if (picturesContainer.getBoundingClientRect().height < window.innerHeight + GAP) {
+      loadPictures(activeFilter, ++pageNumber);
+    }
   };
 
   /**
@@ -83,18 +93,15 @@ module.exports = function() {
     return (footer.getBoundingClientRect().top - window.innerHeight) <= GAP;
   };
 
+  /** Обработчик прокрутки */
   var setScrollEnabled = function() {
-    var lastCall = Date.now();
-
-    /** Обработчик прокрутки */
-    window.addEventListener('scroll', function() {
-      if (Date.now() - lastCall >= THROTTLE_DELAY) {
-        if (isFooterVisible()) {
-          loadPictures(activeFilter, ++pageNumber);
-        }
-        lastCall = Date.now();
+    var optimizedScroll = throttle(function() {
+      if (isFooterVisible()) {
+        loadPictures(activeFilter, ++pageNumber);
       }
-    });
+    }, THROTTLE_DELAY);
+
+    window.addEventListener('scroll', optimizedScroll);
   };
 
   loadPictures(DEFAULT_FILTER, pageNumber);
