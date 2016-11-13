@@ -35,34 +35,36 @@ var Picture = function(data, index) {
   this.renderPicture(img, data.url);
 };
 
-Picture.prototype.remove = function() {
-  this.element.onclick = null;
-};
+Picture.prototype = {
+  remove: function() {
+    this.element.onclick = null;
+  },
 
-Picture.prototype.renderPicture = function(img, url) {
-  var self = this;
-  var photo = new Image(182, 182);
-  var photoTimeout = null;
+  renderPicture: function(img, url) {
+    var self = this;
+    var photo = new Image(182, 182);
+    var photoTimeout = null;
 
-  /**
-   * Обработчики загрузки и ошибки
-   */
-  photo.onload = function() {
-    clearTimeout(photoTimeout);
-    self.element.replaceChild(photo, img);
-  };
+    /**
+     * Обработчики загрузки и ошибки
+     */
+    photo.onload = function() {
+      clearTimeout(photoTimeout);
+      self.element.replaceChild(photo, img);
+    };
 
-  photo.src = url;
+    photo.src = url;
 
-  photo.onerror = function() {
-    self.element.classList.add('picture-load-failure');
-  };
+    photo.onerror = function() {
+      self.element.classList.add('picture-load-failure');
+    };
 
-  photoTimeout = setTimeout(function() {
-    self.element.classList.add('picture-load-failure');
-  }, PHOTO_LOAD_TIMEOUT);
+    photoTimeout = setTimeout(function() {
+      self.element.classList.add('picture-load-failure');
+    }, PHOTO_LOAD_TIMEOUT);
 
-  return this.element;
+    return this.element;
+  }
 };
 
 module.exports = Picture;

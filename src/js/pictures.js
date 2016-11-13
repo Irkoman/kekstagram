@@ -31,7 +31,7 @@ module.exports = function() {
   var DEFAULT_FILTER = 'filter-popular';
 
   /** @type {string} */
-  var activeFilter = DEFAULT_FILTER;
+  var activeFilter = localStorage.getItem('filter') || DEFAULT_FILTER;
 
   /** @type {number} */
   var pageNumber = 0;
@@ -52,6 +52,7 @@ module.exports = function() {
 
     picturesContainer.appendChild(container);
     gallery.setPictures(pictures);
+    document.getElementById(activeFilter).checked = true;
     filters.classList.remove('hidden');
 
     /**
@@ -84,6 +85,7 @@ module.exports = function() {
         picturesContainer.innerHTML = '';
         pageNumber = 0;
         activeFilter = event.target.id;
+        localStorage.setItem('filter', activeFilter);
         loadPictures(activeFilter, pageNumber);
       }
     }, true);
