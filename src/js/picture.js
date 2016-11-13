@@ -1,5 +1,5 @@
 /**
- * @fileoverview Сreates pictureElement based on template
+ * @fileoverview Picture constructor
  * @author Irina Smirnova (Irkoman)
  */
 
@@ -7,63 +7,71 @@
 
 var gallery = require('./gallery');
 
-/**
- * @const
- * @type {number}
- */
-var PHOTO_LOAD_TIMEOUT = 10000;
 var template = document.getElementById('picture-template');
 var templateContainer = 'content' in template ? template.content : template;
 
 var Picture = function(data, index) {
-  var self = this;
   this.data = data;
   this.index = index;
+  this.imageLoadTimeout = null;
   this.element = templateContainer.querySelector('.picture').cloneNode(true);
-  this.element.querySelector('.picture-comments').textContent = data.comments;
-  this.element.querySelector('.picture-likes').textContent = data.likes;
+  this.imageElement = this.element.querySelector('img');
+  this.comments = this.element.querySelector('.picture-comments');
+  this.likes = this.element.querySelector('.picture-comments');
 
-  this.element.onclick = function(event) {
-    event.preventDefault();
-
-    if (!event.target.classList.contains('picture-load-failure')) {
-      gallery.show(self.index);
-    }
-  };
-
-  var img = this.element.querySelector('img');
-  this.renderPicture(img, data.url);
+  this._onImageLoad = this._onImageLoad.bind(this);
+  this._onImageLoadError = this._onImageLoadError.bind(this);
+  this._onImageLoadTimeout = this._onImageLoadTimeout.bind(this);
+  this._onImageClick = this._onImageClick.bind(this);
 };
 
 Picture.prototype = {
-  remove: function() {
-    this.element.onclick = null;
+  IMAGE_LOAD_TIMEOUT: 7000,
+
+  _onImageLoad: function() {
+    clearTimeout(this.imageLoadTimeout);
+    this.image.removeEventListener('load', this._onImageLoad);
+    this.image.removeEventListener('error', this._onImageLoadError);
+    this.element.replaceChild(this.image, this.imageElement);
   },
 
-  renderPicture: function(img, url) {
-    var self = this;
-    var photo = new Image(182, 182);
-    var photoTimeout = null;
+  _onImageLoadError: function() {
+    this.element.classList.add('picture-load-failure');
+  },
 
-    /**
-     * Обработчики загрузки и ошибки
-     */
-    photo.onload = function() {
-      clearTimeout(photoTimeout);
-      self.element.replaceChild(photo, img);
-    };
+  _onImageLoadTimeout: function() {
+    this.element.classList.add('picture-load-failure');
+  },
 
-    photo.src = url;
+  _onImageClick: function(event) {
+    event.preventDefault();
 
-    photo.onerror = function() {
-      self.element.classList.add('picture-load-failure');
-    };
+    if (!event.target.classList.contains('picture-load-failure')) {
+      gallery._show(this.index);
+    }
+  },
 
-    photoTimeout = setTimeout(function() {
-      self.element.classList.add('picture-load-failure');
-    }, PHOTO_LOAD_TIMEOUT);
+  renderPicture: function() {
+    this.image = new Image(182, 182);
+
+    this.image.addEventListener('load', this._onImageLoad);
+    this.image.addEventListener('error', this._onImageLoadError);
+
+    this.imageLoadTimeout = setTimeout(this._onImageLoadTimeout, this.IMAGE_LOAD_TIMEOUT);
+
+    this.image.src = this.data.url;
+    this.comments.textContent = this.data.comments;
+    this.likes.textContent = this.data.likes;
+
+    this.element.addEventListener('click', this._onImageClick);
 
     return this.element;
+  },
+
+  remove: function() {
+    clearTimeout(this.imageLoadTimeout);
+    this.element.removeEventListener('click', this._onImageClick);
+    this.element.parentNode.removeChild(this.element);
   }
 };
 
