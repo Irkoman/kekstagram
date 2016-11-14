@@ -8,7 +8,7 @@
 var load = require('./load');
 var Picture = require('./picture');
 var gallery = require('./gallery');
-var throttle = require('./throttle');
+var utils = require('./utils');
 
 module.exports = function() {
   var picturesContainer = document.querySelector('.pictures');
@@ -102,7 +102,7 @@ module.exports = function() {
 
   /** Обработчик прокрутки */
   var setScrollEnabled = function() {
-    var optimizedScroll = throttle(function() {
+    var optimizedScroll = utils.throttle(function() {
       if (isNextPageNeeded()) {
         loadPictures(activeFilter, ++pageNumber);
       }

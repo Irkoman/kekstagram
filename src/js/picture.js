@@ -6,15 +6,19 @@
 'use strict';
 
 var gallery = require('./gallery');
+var BaseComponent = require('./base-component');
+var utils = require('./utils');
 
 var template = document.getElementById('picture-template');
 var templateContainer = 'content' in template ? template.content : template;
 
 var Picture = function(data, index) {
+  this.element = templateContainer.querySelector('.picture').cloneNode(true);
+  BaseComponent.call(this, this.element);
+
   this.data = data;
   this.index = index;
   this.imageLoadTimeout = null;
-  this.element = templateContainer.querySelector('.picture').cloneNode(true);
   this.imageElement = this.element.querySelector('img');
   this.comments = this.element.querySelector('.picture-comments');
   this.likes = this.element.querySelector('.picture-comments');
@@ -24,6 +28,8 @@ var Picture = function(data, index) {
   this._onImageLoadTimeout = this._onImageLoadTimeout.bind(this);
   this._onImageClick = this._onImageClick.bind(this);
 };
+
+utils.inherit(Picture, BaseComponent);
 
 Picture.prototype = {
   IMAGE_LOAD_TIMEOUT: 7000,
@@ -36,10 +42,12 @@ Picture.prototype = {
   },
 
   _onImageLoadError: function() {
+    this.image.src = '';
     this.element.classList.add('picture-load-failure');
   },
 
   _onImageLoadTimeout: function() {
+    this.image.src = '';
     this.element.classList.add('picture-load-failure');
   },
 
@@ -47,7 +55,7 @@ Picture.prototype = {
     event.preventDefault();
 
     if (!event.target.classList.contains('picture-load-failure')) {
-      gallery._show(this.index);
+      gallery.show(this.index);
     }
   },
 
@@ -68,10 +76,15 @@ Picture.prototype = {
     return this.element;
   },
 
+  show: function() {
+    this.renderPicture();
+    BaseComponent.prototype.show.call(this);
+  },
+
   remove: function() {
     clearTimeout(this.imageLoadTimeout);
     this.element.removeEventListener('click', this._onImageClick);
-    this.element.parentNode.removeChild(this.element);
+    BaseComponent.prototype.remove.call(this);
   }
 };
 

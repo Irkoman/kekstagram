@@ -1,11 +1,12 @@
 /**
- * @fileoverview Универсальная функция-«декоратор» throttle
+ * @fileoverview Модуль со вспомогательными функциями
  * @author Irina Smirnova (Irkoman)
  */
 
 'use strict';
 
 /**
+ * Универсальная функция-«декоратор» throttle
  * @param {function} func
  * @param {number} timeout
  */
@@ -47,4 +48,21 @@ function throttle(func, timeout) {
   return wrapper;
 }
 
-module.exports = throttle;
+/**
+ * Функция inherit наследует один класс от другого, продлевая
+ * цепочку прототипов с помощью пустого конструктора
+ * @param {object} protoObject
+ */
+function inherit(protoObject) {
+  var EmptyConstructor = function() {};
+  EmptyConstructor.prototype = protoObject;
+
+  return new EmptyConstructor();
+}
+
+var utils = {
+  throttle: throttle,
+  inherit: inherit
+};
+
+module.exports = utils;
