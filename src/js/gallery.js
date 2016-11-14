@@ -22,6 +22,7 @@ var Gallery = function() {
   this._hide = this._hide.bind(this);
   this._onGalleryImageClick = this._onGalleryImageClick.bind(this);
   this._onGalleryLikesClick = this._onGalleryLikesClick.bind(this);
+  this._onEscapeButtonClick = this._onEscapeButtonClick.bind(this);
 };
 
 utils.inherit(Gallery, BaseComponent);
@@ -38,9 +39,10 @@ Gallery.prototype = {
   setActivePicture: function(index) {
     var activePictureData = this.pictures[index];
     this.activePicture = index;
-    this.galleryImage.src = activePictureData.url;
-    this.galleryLikes.textContent = activePictureData.likes;
-    this.galleryComments.textContent = activePictureData.comments;
+    this.galleryImage.src = activePictureData.getPictureUrl();
+    this.galleryLikes.textContent = activePictureData.getLikesCount();
+    this.galleryComments.textContent = activePictureData.getCommentsCount();
+    this.galleryLikes.classList.toggle('likes-count-liked', activePictureData.getLikesStatus());
   },
 
   _onGalleryImageClick: function(event) {
@@ -55,7 +57,20 @@ Gallery.prototype = {
 
   _onGalleryLikesClick: function(event) {
     if (event.target === this.galleryLikes) {
-      console.log('пыщ-пыщ');
+      var activePictureData = this.pictures[this.activePicture];
+
+      var likesCount = (activePictureData.getLikesStatus()) ?
+        activePictureData.setLikesCountDown() :
+        activePictureData.setLikesCountUp();
+
+      this.galleryLikes.textContent = likesCount;
+      this.galleryLikes.classList.toggle('likes-count-liked', activePictureData.getLikesStatus());
+    }
+  },
+
+  _onEscapeButtonClick: function(event) {
+    if (event.keyCode === 27) {
+      this._hide();
     }
   },
 
@@ -65,6 +80,7 @@ Gallery.prototype = {
     this.galleryLikes.addEventListener('click', this._onGalleryLikesClick);
     this.galleryClose.addEventListener('click', this._hide);
     this.setActivePicture(index);
+    document.addEventListener('keydown', this._onEscapeButtonClick);
   },
 
   _hide: function() {
@@ -72,6 +88,7 @@ Gallery.prototype = {
     this.galleryImage.removeEventListener('click', this._onGalleryImageClick);
     this.galleryLikes.removeEventListener('click', this._onGalleryLikesClick);
     this.galleryClose.removeEventListener('click', this._hide);
+    document.removeEventListener('keydown', this._onEscapeButtonClick);
   },
 
   remove: function() {
