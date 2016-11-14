@@ -7,6 +7,7 @@
 
 var DataHandler = function(data) {
   this.data = data;
+  this.liked = false;
 };
 
 DataHandler.prototype = {
@@ -26,12 +27,30 @@ DataHandler.prototype = {
     return new Date(this.data.created);
   },
 
+  getLikesStatus: function() {
+    return this.liked;
+  },
+
   setLikesCountUp: function() {
-    return this.data.likes++;
+    this.data.likes++;
+    this.liked = true;
+
+    if (typeof this.onLikesChange === 'function') {
+      this.onLikesChange(this);
+    }
+
+    return this.data.likes;
   },
 
   setLikesCountDown: function() {
-    return this.data.likes--;
+    this.data.likes--;
+    this.liked = false;
+
+    if (typeof this.onLikesChange === 'function') {
+      this.onLikesChange(this);
+    }
+
+    return this.data.likes;
   }
 };
 
