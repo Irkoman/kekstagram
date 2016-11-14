@@ -67,9 +67,9 @@ Picture.prototype = {
 
     this.imageLoadTimeout = setTimeout(this._onImageLoadTimeout, this.IMAGE_LOAD_TIMEOUT);
 
-    this.image.src = this.data.url;
-    this.comments.textContent = this.data.comments;
-    this.likes.textContent = this.data.likes;
+    this.image.src = this.data.getPictureUrl();
+    this.comments.textContent = this.data.getCommentsCount();
+    this.likes.textContent = this.data.getLikesCount();
 
     this.element.addEventListener('click', this._onImageClick);
 

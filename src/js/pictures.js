@@ -7,6 +7,7 @@
 
 var load = require('./load');
 var Picture = require('./picture');
+var DataHandler = require('./data-handler');
 var gallery = require('./gallery');
 var utils = require('./utils');
 
@@ -47,7 +48,8 @@ module.exports = function() {
     var container = document.createDocumentFragment();
 
     pictures.forEach(function(picture, index) {
-      var newPicture = new Picture(picture, pageNumber * PAGE_SIZE + index);
+      var data = new DataHandler(picture);
+      var newPicture = new Picture(data, pageNumber * PAGE_SIZE + index);
       container.appendChild(newPicture.renderPicture());
     });
 

@@ -14,11 +14,14 @@ var Gallery = function() {
 
   this.galleryClose = this.gallery.querySelector('.gallery-overlay-close');
   this.galleryImage = this.gallery.querySelector('.gallery-overlay-image');
-  this.pictures = [];
+  this.galleryLikes = this.gallery.querySelector('.likes-count');
+  this.galleryComments = this.gallery.querySelector('.comments-count');
   this.activePicture = 0;
+  this.pictures = [];
 
   this._hide = this._hide.bind(this);
   this._onGalleryImageClick = this._onGalleryImageClick.bind(this);
+  this._onGalleryLikesClick = this._onGalleryLikesClick.bind(this);
 };
 
 utils.inherit(Gallery, BaseComponent);
@@ -33,10 +36,11 @@ Gallery.prototype = {
   },
 
   setActivePicture: function(index) {
+    var activePictureData = this.pictures[index];
     this.activePicture = index;
-    this.galleryImage.src = this.pictures[index].url;
-    this.gallery.querySelector('.likes-count').textContent = this.pictures[index].likes;
-    this.gallery.querySelector('.comments-count').textContent = this.pictures[index].comments;
+    this.galleryImage.src = activePictureData.url;
+    this.galleryLikes.textContent = activePictureData.likes;
+    this.galleryComments.textContent = activePictureData.comments;
   },
 
   _onGalleryImageClick: function(event) {
@@ -49,9 +53,16 @@ Gallery.prototype = {
     }
   },
 
+  _onGalleryLikesClick: function(event) {
+    if (event.target === this.galleryLikes) {
+      console.log('пыщ-пыщ');
+    }
+  },
+
   show: function(index) {
     this.gallery.classList.remove('invisible');
     this.galleryImage.addEventListener('click', this._onGalleryImageClick);
+    this.galleryLikes.addEventListener('click', this._onGalleryLikesClick);
     this.galleryClose.addEventListener('click', this._hide);
     this.setActivePicture(index);
   },
@@ -59,6 +70,7 @@ Gallery.prototype = {
   _hide: function() {
     this.gallery.classList.add('invisible');
     this.galleryImage.removeEventListener('click', this._onGalleryImageClick);
+    this.galleryLikes.removeEventListener('click', this._onGalleryLikesClick);
     this.galleryClose.removeEventListener('click', this._hide);
   },
 
