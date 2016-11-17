@@ -1,4 +1,3 @@
-/* global Resizer: true */
 /* global Cookies: true */
 
 /**
@@ -7,6 +6,8 @@
  */
 
 'use strict';
+
+var Resizer = require('./resizer');
 
 module.exports = function() {
   /** @enum {string} */
@@ -107,9 +108,9 @@ module.exports = function() {
   window.addEventListener('resizerchange', function() {
     var constraint = currentResizer.getConstraint();
 
-    xField.value = constraint.x;
-    yField.value = constraint.y;
-    sideField.value = constraint.side;
+    xField.value = Math.floor(constraint.x);
+    yField.value = Math.floor(constraint.y);
+    sideField.value = Math.floor(constraint.side);
   });
 
   resizeControls.addEventListener('input', function() {

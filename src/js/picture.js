@@ -5,7 +5,6 @@
 
 'use strict';
 
-var gallery = require('./gallery');
 var BaseComponent = require('./base-component');
 var utils = require('./utils');
 
@@ -21,13 +20,14 @@ var Picture = function(data, index) {
   this.imageLoadTimeout = null;
   this.imageElement = this.element.querySelector('img');
   this.comments = this.element.querySelector('.picture-comments');
-  this.likes = this.element.querySelector('.picture-comments');
+  this.likes = this.element.querySelector('.picture-likes');
 
   this._onImageLoad = this._onImageLoad.bind(this);
   this._onImageLoadError = this._onImageLoadError.bind(this);
   this._onImageLoadTimeout = this._onImageLoadTimeout.bind(this);
   this._onImageClick = this._onImageClick.bind(this);
   this._onLikesClick = this._onLikesClick.bind(this);
+  this._remove = this._remove.bind(this);
 };
 
 utils.inherit(Picture, BaseComponent);
@@ -37,26 +37,30 @@ Picture.prototype = {
 
   _onImageLoad: function() {
     clearTimeout(this.imageLoadTimeout);
+    this.element.replaceChild(this.image, this.imageElement);
     this.image.removeEventListener('load', this._onImageLoad);
     this.image.removeEventListener('error', this._onImageLoadError);
-    this.element.replaceChild(this.image, this.imageElement);
   },
 
   _onImageLoadError: function() {
     this.image.src = '';
     this.element.classList.add('picture-load-failure');
+    this.image.removeEventListener('load', this._onImageLoad);
+    this.image.removeEventListener('error', this._onImageLoadError);
   },
 
   _onImageLoadTimeout: function() {
     this.image.src = '';
     this.element.classList.add('picture-load-failure');
+    this.image.removeEventListener('load', this._onImageLoad);
+    this.image.removeEventListener('error', this._onImageLoadError);
   },
 
   _onImageClick: function(event) {
     event.preventDefault();
 
     if (!event.target.classList.contains('picture-load-failure')) {
-      gallery.show(this.index);
+      location.hash = '#photo/photos/' + this.image.src.split('photos/')[1];
     }
   },
 
@@ -87,7 +91,7 @@ Picture.prototype = {
     BaseComponent.prototype.show.call(this);
   },
 
-  remove: function() {
+  _remove: function() {
     clearTimeout(this.imageLoadTimeout);
     this.data.onLikesChange = null;
     this.element.removeEventListener('click', this._onImageClick);
