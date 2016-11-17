@@ -8,7 +8,7 @@
 var load = require('./load');
 var Picture = require('./picture');
 var DataHandler = require('./data-handler');
-var gallery = require('./gallery');
+var Gallery = require('./gallery');
 var utils = require('./utils');
 
 module.exports = function() {
@@ -16,6 +16,7 @@ module.exports = function() {
   var filters = document.querySelector('.filters');
   var footer = document.querySelector('.footer');
   var loadedPictures = [];
+  var gallery = new Gallery();
 
   /** @constant {number} */
   var PAGE_SIZE = 12;
@@ -53,11 +54,13 @@ module.exports = function() {
 
     pictures.forEach(function(picture, index) {
       var newPicture = new Picture(picture, pageNumber * PAGE_SIZE + index);
+      loadedPictures.push(newPicture);
       container.appendChild(newPicture.renderPicture());
     });
 
     picturesContainer.appendChild(container);
     gallery.setPictures(pictures);
+    gallery._restoreFromHash();
     document.getElementById(activeFilter).checked = true;
     filters.classList.remove('hidden');
   };
@@ -73,7 +76,6 @@ module.exports = function() {
     }, function(data) {
       if (data.length > 0) {
         renderPictures(data);
-        loadedPictures = data;
       }
       if (isNextPageNeeded() && isNextPageAvailable(loadedPictures)) {
         pageNumber++;
@@ -82,11 +84,14 @@ module.exports = function() {
     });
   };
 
+
+
   /**  Обработчик кликов по фильтрам */
   var setFiltersEnabled = function() {
     filters.addEventListener('change', function(event) {
       if (event.target.name === 'filter') {
         gallery.clearPictures();
+        removePictures();
         picturesContainer.innerHTML = '';
         pageNumber = 0;
         activeFilter = event.target.id;
@@ -114,6 +119,14 @@ module.exports = function() {
     }, THROTTLE_DELAY);
 
     window.addEventListener('scroll', optimizedScroll);
+  };
+
+  var removePictures = function() {
+    loadedPictures.forEach(function(picture) {
+      picture._remove();
+    });
+
+    loadedPictures.length = 0;
   };
 
   loadPictures(activeFilter, pageNumber);
