@@ -84,15 +84,12 @@ module.exports = function() {
     });
   };
 
-
-
   /**  Обработчик кликов по фильтрам */
   var setFiltersEnabled = function() {
     filters.addEventListener('change', function(event) {
       if (event.target.name === 'filter') {
         gallery.clearPictures();
         removePictures();
-        picturesContainer.innerHTML = '';
         pageNumber = 0;
         activeFilter = event.target.id;
         localStorage.setItem('filter', activeFilter);
@@ -123,10 +120,10 @@ module.exports = function() {
 
   var removePictures = function() {
     loadedPictures.forEach(function(picture) {
-      picture._remove();
+      picture.remove();
     });
 
-    loadedPictures.length = 0;
+    loadedPictures = [];
   };
 
   loadPictures(activeFilter, pageNumber);
