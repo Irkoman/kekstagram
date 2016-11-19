@@ -27,7 +27,6 @@ var Picture = function(data, index) {
   this._onImageLoadTimeout = this._onImageLoadTimeout.bind(this);
   this._onImageClick = this._onImageClick.bind(this);
   this._onLikesClick = this._onLikesClick.bind(this);
-  this._remove = this._remove.bind(this);
 };
 
 utils.inherit(Picture, BaseComponent);
@@ -91,10 +90,12 @@ Picture.prototype = {
     BaseComponent.prototype.show.call(this);
   },
 
-  _remove: function() {
+  remove: function() {
     clearTimeout(this.imageLoadTimeout);
     this.data.onLikesChange = null;
     this.element.removeEventListener('click', this._onImageClick);
+    this.image.removeEventListener('load', this._onImageLoad);
+    this.image.removeEventListener('error', this._onImageLoadError);
     BaseComponent.prototype.remove.call(this);
   }
 };
